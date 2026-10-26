@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#b91c1c">
+<title>El Perú en Llamas: Comunidades en Acción</title>
+<style>
+:root{--red:#b91c1c;--orange:#ea580c;--ink:#172033;--muted:#5b6475;--paper:#fffaf0;--green:#166534}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(140deg,#fff7ed,#fef2f2 55%,#f0fdf4);color:var(--ink)}
+header{background:linear-gradient(120deg,#991b1b,#ea580c);color:white;padding:28px 18px 32px;text-align:center}
+header .tag{display:inline-block;border:1px solid #ffffff80;border-radius:999px;padding:5px 11px;font-size:.85rem}
+h1{font-size:clamp(1.8rem,5vw,3rem);line-height:1.05;margin:14px auto;max-width:850px}
+header p{max-width:680px;margin:0 auto;line-height:1.5}
+main{max-width:850px;margin:0 auto;padding:18px}
+.panel{background:white;border:1px solid #eadfd5;border-radius:18px;padding:20px;margin:14px 0;box-shadow:0 8px 24px #3b1c1010}
+.progress-wrap{height:9px;background:#fee2e2;border-radius:99px;overflow:hidden;margin:10px 0}
+#progress{height:100%;width:0;background:linear-gradient(90deg,#dc2626,#f97316);transition:width .25s}
+.meta{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:.92rem}
+.pill{background:#fff7ed;border:1px solid #fed7aa;border-radius:999px;padding:5px 10px}
+h2{margin:8px 0 12px;font-size:1.45rem} .scenario{background:#fff7ed;border-left:4px solid var(--orange);padding:13px 14px;border-radius:10px;line-height:1.55}
+.options{display:grid;gap:10px;margin:16px 0}
+button.option{width:100%;text-align:left;border:2px solid #e5e7eb;background:white;border-radius:12px;padding:13px 14px;font-size:1rem;cursor:pointer;color:var(--ink)}
+button.option:hover:not(:disabled){border-color:#f97316;background:#fff7ed}
+button.option:focus-visible,.primary:focus-visible{outline:3px solid #fb923c;outline-offset:2px}
+button.option:disabled{cursor:default;opacity:1}
+.option.correct{border-color:#16a34a;background:#f0fdf4}.option.wrong{border-color:#dc2626;background:#fef2f2}
+.feedback{padding:14px;border-radius:12px;line-height:1.5;margin:12px 0}
+.feedback.good{background:#f0fdf4;border:1px solid #86efac}.feedback.bad{background:#fef2f2;border:1px solid #fca5a5}
+.primary{background:#b91c1c;color:white;border:0;border-radius:12px;padding:12px 18px;font-weight:700;font-size:1rem;cursor:pointer}
+.primary:hover{background:#991b1b}.secondary{background:white;color:#991b1b;border:1px solid #fecaca;border-radius:12px;padding:10px 14px;font-weight:650;cursor:pointer}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.small{color:var(--muted);font-size:.9rem;line-height:1.5}
+footer{text-align:center;padding:18px;color:var(--muted);font-size:.85rem}
+.station-list{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.station-dot{border:1px solid #fed7aa;border-radius:10px;padding:8px 10px;background:#fff7ed}
+.station-dot.active{background:#b91c1c;color:white;border-color:#b91c1c}
+.station-dot.done{background:#dcfce7;color:#166534;border-color:#86efac}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <span class="tag">MISIÓN EDUCATIVA · JUNÍN Y HUANCAYO</span>
+  <h1>🔥 El Perú en Llamas:<br>Comunidades en Acción</h1>
+  <p>Conviértete en guardián o guardiana del territorio. Resuelve cinco desafíos y demuestra que una comunidad organizada puede construir soluciones.</p>
+</header>
+<main>
+  <section class="panel" id="intro">
+    <div class="meta"><span class="pill">3.º–5.º de secundaria</span><span class="pill">5 estaciones</span><span class="pill">500 puntos posibles</span></div>
+    <h2>Tu misión empieza aquí</h2>
+    <p>Lee cada caso, conversa con tu equipo y selecciona la alternativa más adecuada. Después recibirás retroalimentación para aprender de cada decisión.</p>
+    <p class="small"><strong>Regla:</strong> cada estación vale 100 puntos si aciertas al primer intento. Si fallas, lee la explicación y vuelve a intentarlo; podrás completar la misión, aunque no obtengas los puntos de esa estación.</p>
+    <button class="primary" id="startBtn">Comenzar misión</button>
+  </section>
+  <section class="panel hidden" id="game">
+    <div class="meta"><span class="pill" id="stationCounter">Estación 1 de 5</span><span class="pill" id="scorePill">Puntaje: 0</span></div>
+    <div class="progress-wrap"><div id="progress"></div></div>
+    <div class="station-list" id="stationList"></div>
+    <h2 id="questionTitle"></h2>
+    <div class="scenario" id="scenario"></div>
+    <div class="options" id="options"></div>
+    <div id="feedback" class="feedback hidden" aria-live="polite"></div>
+    <div class="actions">
+      <button class="primary hidden" id="continueBtn">Siguiente estación</button>
+      <button class="secondary" id="restartBtn">Reiniciar juego</button>
+    </div>
+  </section>
+  <section class="panel hidden" id="finish">
+    <h2>🏆 ¡Misión completada!</h2>
+    <p id="finalScore"></p>
+    <div class="scenario" id="finalMessage"></div>
+    <h2>Reto final para el equipo</h2>
+    <p>En un minuto, propongan una acción concreta que los estudiantes de su colegio podrían realizar para cuidar su comunidad. Incluyan: problema, responsables y primer paso.</p>
+    <button class="primary" id="playAgainBtn">Jugar de nuevo</button>
+  </section>
+  <section class="panel">
+    <h2>¿Qué aprendemos?</h2>
+    <p>La identidad cultural, la participación juvenil, el cuidado ambiental y el diálogo son recursos importantes para afrontar problemas colectivos. Los casos son situaciones educativas; las respuestas proponen acciones de organización, prevención y coordinación con las autoridades competentes.</p>
+    <p class="small">Material para uso escolar. Adaptar las actividades a las normas del centro educativo y acompañar el debate con un docente.</p>
+  </section>
+</main>
+<footer>El Perú en Llamas: Comunidades en Acción · Juego educativo contextualizado en Junín</footer>
+<script>
+const stations = [
+ {title:"1. Identidad huanca: memoria viva",scenario:"En tu colegio de Huancayo se prepara una actividad cultural. Algunos estudiantes dicen que las tradiciones locales ya no son importantes. ¿Qué propuesta ayudaría a valorar la identidad sin excluir a nadie?",options:[
+ "A. Prohibir las expresiones culturales que no interesen a la mayoría.",
+ "B. Organizar una actividad participativa donde estudiantes y familias compartan música, relatos, danzas y memorias del Valle del Mantaro.",
+ "C. Presentar únicamente información de otras regiones."
+ ],correct:1,explanation:"La identidad se fortalece al compartir la memoria y las expresiones culturales de forma participativa y respetuosa. El huaylarsh es una expresión cultural importante del Valle del Mantaro, pero la identidad local también incluye historias familiares, lenguas, costumbres y nuevas experiencias."},
+ {title:"2. Alerta en el río",scenario:"Una comunidad cercana al río Mantaro observa residuos acumulados en una zona de la ribera. El grupo quiere actuar de forma responsable. ¿Cuál debería ser el primer paso?",options:[
+ "A. Tirar los residuos en otro lugar para despejar la ribera.",
+ "B. Publicar acusaciones sin verificar qué ocurrió.",
+ "C. Registrar el problema de forma segura, informar a las autoridades competentes y coordinar una acción comunitaria de prevención."
+ ],correct:2,explanation:"Una respuesta efectiva combina información verificable, comunicación con las autoridades y organización comunitaria. No se debe manipular residuos peligrosos ni entrar en zonas inseguras. Una jornada de limpieza requiere evaluación de riesgos y disposición adecuada de los residuos."},
+ {title:"3. Jóvenes con voz",scenario:"En una reunión escolar sobre el uso de los espacios públicos, los adultos hablan todo el tiempo y no escuchan las propuestas juveniles. ¿Qué acción promueve una participación más democrática?",options:[
+ "A. Solicitar un turno para que los estudiantes presenten propuestas y participen en acuerdos junto con los demás.",
+ "B. Abandonar la reunión y no volver a participar.",
+ "C. Decidir por todos sin escuchar opiniones diferentes."
+ ],correct:0,explanation:"La participación democrática implica diálogo, escucha y oportunidades reales para expresar ideas. Los jóvenes pueden proponer soluciones, asumir responsabilidades y colaborar con vecinos, docentes y autoridades."},
+ {title:"4. Cuando la comunidad se organiza",scenario:"Después de lluvias intensas, una vía de acceso a una comunidad del Valle del Mantaro queda bloqueada. ¿Qué decisión es más segura y solidaria?",options:[
+ "A. Enviar a estudiantes a despejar la vía sin equipo ni orientación.",
+ "B. Avisar a los responsables locales y a los servicios de emergencia cuando corresponda, evitar la zona peligrosa y organizar apoyo seguro para las familias afectadas.",
+ "C. Ignorar el problema porque solo le corresponde a una persona."
+ ],correct:1,explanation:"Ante una emergencia, la seguridad es lo primero. Se debe alertar a los responsables, seguir indicaciones oficiales y no exponer a estudiantes a derrumbes, cables, crecidas u otros riesgos. La comunidad puede coordinar información y apoyo sin sustituir a personal especializado."},
+ {title:"5. Comunidades en acción",scenario:"Tu equipo debe proponer una iniciativa realista para mejorar su barrio o colegio en Huancayo. ¿Qué plan tiene más posibilidades de funcionar?",options:[
+ "A. Hacer una promesa general y esperar que otras personas actúen.",
+ "B. Culpar públicamente a un grupo sin dialogar ni reunir información.",
+ "C. Definir un problema concreto, acordar una meta, repartir tareas, coordinar permisos y revisar los resultados."
+ ],correct:2,explanation:"Un plan comunitario necesita un objetivo claro, responsabilidades, coordinación y evaluación. Por ejemplo, reducir residuos en el colegio: medir qué se genera, instalar puntos de segregación con autorización, informar a la comunidad y revisar los resultados después de unas semanas."}
+];
+let index=0,score=0,answered=false,earned=Array(stations.length).fill(false),attempted=Array(stations.length).fill(false);
+const $=id=>document.getElementById(id);
+function show(id){$(id).classList.remove('hidden')} function hide(id){$(id).classList.add('hidden')}
+function reset(){index=0;score=0;answered=false;earned=Array(stations.length).fill(false);attempted=Array(stations.length).fill(false);hide('finish');hide('intro');show('game');render()}
+function render(){
+ const s=stations[index]; answered=false;
+ $('stationCounter').textContent=`Estación ${index+1} de ${stations.length}`;
+ $('scorePill').textContent=`Puntaje: ${score}`;
+ $('progress').style.width=`${index/stations.length*100}%`;
+ $('questionTitle').textContent=s.title;$('scenario').textContent=s.scenario;
+ $('options').innerHTML='';hide('feedback');hide('continueBtn');
+ $('stationList').innerHTML=stations.map((x,i)=>`<span class="station-dot ${i===index?'active':earned[i]?'done':''}">${i+1}${earned[i]?' ✓':''}</span>`).join('');
+ s.options.forEach((label,i)=>{const b=document.createElement('button');b.className='option';b.textContent=label;b.onclick=()=>choose(i,b);$('options').appendChild(b)});
+ // Direct QR links can open a station with #estacion1 ... #estacion5.
+}
+function choose(choice,btn){
+ if(answered)return;
+ const s=stations[index];attempted[index]=true;
+ const buttons=[...document.querySelectorAll('.option')];
+ buttons.forEach((b,i)=>{b.disabled=true;if(i===s.correct)b.classList.add('correct')});
+ const fb=$('feedback');
+ if(choice===s.correct){answered=true;if(!earned[index]){score+=100;earned[index]=true}
+ fb.className='feedback good';fb.innerHTML='<strong>¡Correcto! +100 puntos</strong><br>'+s.explanation;
+ }else{
+ btn.classList.add('wrong');fb.className='feedback bad';fb.innerHTML='<strong>No es la alternativa más adecuada.</strong><br>'+s.explanation+'<br><br><button class="secondary" id="retryBtn">Intentar otra vez</button>';
+ $('retryBtn').onclick=()=>{answered=false;renderQuestionOnly()};
+ }
+ show('feedback');$('scorePill').textContent=`Puntaje: ${score}`;
+ if(choice===s.correct){$('continueBtn').textContent=index===stations.length-1?'Ver resultado final':'Siguiente estación';show('continueBtn')}
+}
+function renderQuestionOnly(){
+ const s=stations[index];hide('feedback');hide('continueBtn');$('options').innerHTML='';
+ s.options.forEach((label,i)=>{const b=document.createElement('button');b.className='option';b.textContent=label;b.onclick=()=>choose(i,b);$('options').appendChild(b)});
+}
+function finish(){
+ hide('game');show('finish');$('progress').style.width='100%';$('finalScore').textContent=`Tu equipo obtuvo ${score} de 500 puntos.`;
+ let msg=score>=400?'¡Excelente trabajo! Han demostrado pensamiento crítico y compromiso con su comunidad.':score>=200?'¡Buen esfuerzo! Revisen las explicaciones y conversen sobre cómo mejorar sus decisiones.':'Toda misión es una oportunidad para aprender. Repasen las explicaciones y vuelvan a intentarlo.';
+ $('finalMessage').textContent=msg;
+}
+$('startBtn').onclick=reset;$('restartBtn').onclick=()=>{show('intro');hide('game');hide('finish')};$('playAgainBtn').onclick=reset;
+$('continueBtn').onclick=()=>{if(index<stations.length-1){index++;render()}else finish()};
+function startAtHash(){const m=location.hash.match(/estacion([1-5])/i);if(m){index=Number(m[1])-1;show('game');hide('intro');hide('finish');render()}}
+window.addEventListener('hashchange',startAtHash);
+startAtHash();
+</script>
+</body>
+</html>
